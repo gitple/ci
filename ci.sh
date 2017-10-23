@@ -12,7 +12,7 @@ LOG_ROTATE_SRC_FILE="ci.logrotate"
 LOG_ROTATE_DST_FILE="/etc/etc/logrotate.d/ci"
 
 if [ ! -f /etc/etc/logrotate.d/ci ]; then
-  echo "Warning: logroate file is missing\nCopy $LOG_ROTATE_SRC_FILE to $LOG_ROTATE_DST_FILE"
+  echo "Warning: logroate file is missing; Copy $LOG_ROTATE_SRC_FILE to $LOG_ROTATE_DST_FILE"
   #sudo cp -f $LOG_ROTATE_SRC_FILE $LOG_ROTATE_DST_FILE;
 fi
 
@@ -25,4 +25,4 @@ RUNNIG_PID=`lsof -i :$CI_PORT | grep LISTEN | awk '{print $2}'`
 [ -n "$RUNNIG_PID" ] && kill -9 "$RUNNIG_PID"
 
 #run
-nohup node app.js > $LOG_FILE 2>&1 &
+nohup node app.js -p $CI_PORT > $LOG_FILE 2>&1 &

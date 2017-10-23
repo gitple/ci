@@ -5,12 +5,27 @@ var os = require('os');
 var process = require('process');
 var async = require('async');
 
+const spawn = require('child_process').spawn;
+
+var program = require('commander');
+
+program
+  .usage('[options]')
+  .option('-c, --config <path>', 'set config path. defaults to ./config.json', './config.json')
+  .option('-p, --port <n>', 'listening port', parseInt)
+  .option('-s, --secret <secret>', 'webhook secret. use CI_SECRET env if not defined')
+  .parse(process.argv);
+  if (!process.argv.slice(2).length || !program.port ||
+    (!program.secret && !process.env.CI_SECRET)) {
+    program.outputHelp();
+    process.exit(1);
+  }
+
 var github = githubhook({
-  port: process.env.CI_PORT,
-  secret: process.env.CI_SECRET,
+  port: program.port,
+  secret: program.secret || process.env.CI_SECRET,
   path: '/',
 });
-const spawn = require('child_process').spawn;
 
 var CFG = require('./config.json');
 

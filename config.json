@@ -13,10 +13,8 @@
       "commands": "git pull"
     },
     {
-      "targets": [ "server/app", "server/lib" ],
-      "commands": [ 
-        "cd `git rev-parse --show-toplevel`/deploy; make app;",
-        "cd `git rev-parse --show-toplevel`/deploy; sleep 5; npm test"]
+      "targets": [],
+      "commands": [] 
     }
   ]
 }
