@@ -1,0 +1,17 @@
+{
+  "name": "ci",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^2.1.5",
+    "githubhook": "^1.7.1",
+    "lodash": "^4.17.4",
+    "slack-notify": "^0.1.6"
+  }
+}

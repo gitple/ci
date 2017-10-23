@@ -1,0 +1,22 @@
+{
+  "notification": {
+    "selection": "slack",
+    "slack": {
+      "webhookurl": "your_webhook_url",
+      "channel": "your_channel_to_be_notified"
+    }
+  },
+  "repoPath": "_your_git_repo_path_to_build_and_test_",
+  "jobs": [
+    {
+      "targets": "*",
+      "commands": "git pull"
+    },
+    {
+      "targets": [ "server/app", "server/lib" ],
+      "commands": [ 
+        "cd `git rev-parse --show-toplevel`/deploy; make app;",
+        "cd `git rev-parse --show-toplevel`/deploy; sleep 5; npm test"]
+    }
+  ]
+}

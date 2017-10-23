@@ -1,0 +1,13 @@
+/home/ubuntu/ci/ci.log
+{
+  #size 50k
+  daily
+  dateext
+  missingok
+  rotate 7
+  compress
+  delaycompress
+  notifempty
+  create 666 ubuntu ubuntu
+  copytruncate
+}
