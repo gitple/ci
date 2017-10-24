@@ -79,3 +79,9 @@ config.json
   ]
 }
 ```
+
+TODO
+-------
+
+- https connection support.
+- queueing pull event while another event is already under way.
