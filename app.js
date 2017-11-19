@@ -23,7 +23,7 @@ program
   }
 
 var CFG;
-try { CFG = require(program.config); } catch (e) {}
+try { CFG = require(program.config); } catch (e) {console.error(e);}
 if (!CFG) {
   console.error('failure to load config: ' + program.config);
   process.exit(1);
@@ -40,9 +40,9 @@ var github,
   failLast = true;
 
 if (_.get(CFG, 'notification.selection') === 'slack' && 
-   CFG.notification.selection.webhookurl) {
-  slack = require('slack-notify')(CFG.notification.selection.webhookurl);
-  slackChannel = CFG.notification.selection.channel || 'ci';
+   CFG.notification.slack.webhookurl) {
+  slack = require('slack-notify')(CFG.notification.slack.webhookurl);
+  slackChannel = CFG.notification.slack.channel || 'ci';
 }
 
 repoPath = CFG.repoPath || process.cwd();

@@ -1,0 +1,176 @@
+{
+  "ref": "refs/heads/master",
+  "before": "43f223afcca6b81498c6075996192c283f171b21",
+  "after": "02c46e757b4ecf50e6e3e58adf72f84989ed6b03",
+  "created": false,
+  "deleted": false,
+  "forced": false,
+  "base_ref": null,
+  "compare": "https://github.com/gitple/ci/compare/43f223afcca6...02c46e757b4e",
+  "commits": [
+    {
+      "id": "02c46e757b4ecf50e6e3e58adf72f84989ed6b03",
+      "tree_id": "035da69b9b4bf7fc59bb27441eceecf7b7a89a50",
+      "distinct": true,
+      "message": "https and queuing support",
+      "timestamp": "2017-11-19T21:15:11+09:00",
+      "url": "https://github.com/gitple/ci/commit/02c46e757b4ecf50e6e3e58adf72f84989ed6b03",
+      "author": {
+        "username": "nobody"
+      },
+      "committer": {
+        "username": "nobody"
+      },
+      "added": [
+        "ci.cnf"
+      ],
+      "removed": [
+
+      ],
+      "modified": [
+        "README.md",
+        "app.js",
+        "ci.sh"
+      ]
+    }
+  ],
+  "head_commit": {
+    "id": "02c46e757b4ecf50e6e3e58adf72f84989ed6b03",
+    "tree_id": "035da69b9b4bf7fc59bb27441eceecf7b7a89a50",
+    "distinct": true,
+    "message": "https and queuing support",
+    "timestamp": "2017-11-19T21:15:11+09:00",
+    "url": "https://github.com/gitple/ci/commit/02c46e757b4ecf50e6e3e58adf72f84989ed6b03",
+    "author": {
+      "username": "nobody"
+    },
+    "committer": {
+      "username": "nobody"
+    },
+    "added": [
+      "ci.cnf"
+    ],
+    "removed": [
+
+    ],
+    "modified": [
+      "README.md",
+      "app.js",
+      "ci.sh"
+    ]
+  },
+  "repository": {
+    "id": 107966050,
+    "name": "ci",
+    "full_name": "gitple/ci",
+    "owner": {
+      "name": "gitple",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/21234039?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/gitple",
+      "html_url": "https://github.com/gitple",
+      "followers_url": "https://api.github.com/users/gitple/followers",
+      "following_url": "https://api.github.com/users/gitple/following{/other_user}",
+      "gists_url": "https://api.github.com/users/gitple/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/gitple/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/gitple/subscriptions",
+      "organizations_url": "https://api.github.com/users/gitple/orgs",
+      "repos_url": "https://api.github.com/users/gitple/repos",
+      "events_url": "https://api.github.com/users/gitple/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/gitple/received_events",
+      "type": "User",
+      "site_admin": false
+    },
+    "private": true,
+    "html_url": "https://github.com/gitple/ci",
+    "description": "ultra simple continuous integration tool",
+    "fork": false,
+    "url": "https://github.com/gitple/ci",
+    "forks_url": "https://api.github.com/repos/gitple/ci/forks",
+    "keys_url": "https://api.github.com/repos/gitple/ci/keys{/key_id}",
+    "collaborators_url": "https://api.github.com/repos/gitple/ci/collaborators{/collaborator}",
+    "teams_url": "https://api.github.com/repos/gitple/ci/teams",
+    "hooks_url": "https://api.github.com/repos/gitple/ci/hooks",
+    "issue_events_url": "https://api.github.com/repos/gitple/ci/issues/events{/number}",
+    "events_url": "https://api.github.com/repos/gitple/ci/events",
+    "assignees_url": "https://api.github.com/repos/gitple/ci/assignees{/user}",
+    "branches_url": "https://api.github.com/repos/gitple/ci/branches{/branch}",
+    "tags_url": "https://api.github.com/repos/gitple/ci/tags",
+    "blobs_url": "https://api.github.com/repos/gitple/ci/git/blobs{/sha}",
+    "git_tags_url": "https://api.github.com/repos/gitple/ci/git/tags{/sha}",
+    "git_refs_url": "https://api.github.com/repos/gitple/ci/git/refs{/sha}",
+    "trees_url": "https://api.github.com/repos/gitple/ci/git/trees{/sha}",
+    "statuses_url": "https://api.github.com/repos/gitple/ci/statuses/{sha}",
+    "languages_url": "https://api.github.com/repos/gitple/ci/languages",
+    "stargazers_url": "https://api.github.com/repos/gitple/ci/stargazers",
+    "contributors_url": "https://api.github.com/repos/gitple/ci/contributors",
+    "subscribers_url": "https://api.github.com/repos/gitple/ci/subscribers",
+    "subscription_url": "https://api.github.com/repos/gitple/ci/subscription",
+    "commits_url": "https://api.github.com/repos/gitple/ci/commits{/sha}",
+    "git_commits_url": "https://api.github.com/repos/gitple/ci/git/commits{/sha}",
+    "comments_url": "https://api.github.com/repos/gitple/ci/comments{/number}",
+    "issue_comment_url": "https://api.github.com/repos/gitple/ci/issues/comments{/number}",
+    "contents_url": "https://api.github.com/repos/gitple/ci/contents/{+path}",
+    "compare_url": "https://api.github.com/repos/gitple/ci/compare/{base}...{head}",
+    "merges_url": "https://api.github.com/repos/gitple/ci/merges",
+    "archive_url": "https://api.github.com/repos/gitple/ci/{archive_format}{/ref}",
+    "downloads_url": "https://api.github.com/repos/gitple/ci/downloads",
+    "issues_url": "https://api.github.com/repos/gitple/ci/issues{/number}",
+    "pulls_url": "https://api.github.com/repos/gitple/ci/pulls{/number}",
+    "milestones_url": "https://api.github.com/repos/gitple/ci/milestones{/number}",
+    "notifications_url": "https://api.github.com/repos/gitple/ci/notifications{?since,all,participating}",
+    "labels_url": "https://api.github.com/repos/gitple/ci/labels{/name}",
+    "releases_url": "https://api.github.com/repos/gitple/ci/releases{/id}",
+    "deployments_url": "https://api.github.com/repos/gitple/ci/deployments",
+    "created_at": 1508754054,
+    "updated_at": "2017-10-23T12:19:41Z",
+    "pushed_at": 1511093731,
+    "git_url": "git://github.com/gitple/ci.git",
+    "ssh_url": "git@github.com:gitple/ci.git",
+    "clone_url": "https://github.com/gitple/ci.git",
+    "svn_url": "https://github.com/gitple/ci",
+    "homepage": null,
+    "size": 11,
+    "stargazers_count": 0,
+    "watchers_count": 0,
+    "language": "JavaScript",
+    "has_issues": true,
+    "has_projects": true,
+    "has_downloads": true,
+    "has_wiki": true,
+    "has_pages": false,
+    "forks_count": 0,
+    "mirror_url": null,
+    "archived": false,
+    "open_issues_count": 0,
+    "forks": 0,
+    "open_issues": 0,
+    "watchers": 0,
+    "default_branch": "master",
+    "stargazers": 0,
+    "master_branch": "master"
+  },
+  "pusher": {
+    "name": "nobody",
+    "email": "nobody@users.noreply.github.com"
+  },
+  "sender": {
+    "login": "nobody",
+    "id": 2321159,
+    "avatar_url": "https://avatars3.githubusercontent.com/u/2321159?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/nobody",
+    "html_url": "https://github.com/nobody",
+    "followers_url": "https://api.github.com/users/nobody/followers",
+    "following_url": "https://api.github.com/users/nobody/following{/other_user}",
+    "gists_url": "https://api.github.com/users/nobody/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/nobody/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/nobody/subscriptions",
+    "organizations_url": "https://api.github.com/users/nobody/orgs",
+    "repos_url": "https://api.github.com/users/nobody/repos",
+    "events_url": "https://api.github.com/users/nobody/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/nobody/received_events",
+    "type": "User",
+    "site_admin": false
+  }
+}

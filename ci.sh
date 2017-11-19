@@ -1,7 +1,8 @@
 #!/bin/bash
 
 [ -z "$CI_PORT" ] && echo "CI_PORT: listening port is missing" && exit -1
-[ -z "$CI_SECRET" ] && echo "SECRET: secret is missing" && exit -1
+[ -z "$CI_SECRET" ] && echo "CI_SECRET: secret is missing" && exit -1
+[ -z "$CI_CONFIG" ] && echo "CI_CONFIG: config path is missing" && exit -1
 
 #change to current dir
 CUR_DIR=$(dirname $0)
@@ -32,4 +33,4 @@ RUNNIG_PID=`lsof -i :$CI_PORT | grep LISTEN | awk '{print $2}'`
 [ -n "$RUNNIG_PID" ] && kill -9 "$RUNNIG_PID"
 
 #run
-nohup node app.js -p $CI_PORT > $LOG_FILE 2>&1 &
+nohup node app.js -p $CI_PORT -c $CI_CONFIG > $LOG_FILE 2>&1 &
