@@ -20,6 +20,13 @@ fi
 #install githubhook
 [ -d node_modules/ ] || npm install
 
+if [ ! -f key.pem ]; then
+  openssl genrsa -out key.pem 2048
+  openssl req -new -key key.pem -config ci.cnf -out ci.csr
+  openssl x509 -req -days 365 -in ci.csr -signkey key.pem -out cert.pem
+  rm -f ci.csr
+fi
+
 #restart if already running.
 RUNNIG_PID=`lsof -i :$CI_PORT | grep LISTEN | awk '{print $2}'`
 [ -n "$RUNNIG_PID" ] && kill -9 "$RUNNIG_PID"
