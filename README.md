@@ -7,6 +7,8 @@ How to use
 - Environment variables
   - `CI_PORT`: listening port number.
   - `CI_SECRET`: the secret set at your webhook configuration in Github.
+- At the 1st run of ci.sh, npm modules are installed.
+- The log file, `ci.log` is created; Place `ci.logrotate` file into /etc/logrotate.d/ after fixing the log path in it.
 
 ``` 
 CI_PORT=51234 CI_SECRET={webhook secret} {path_to_ci_dir}/ci.sh
@@ -51,7 +53,7 @@ Config file
 ## jobs
   - `jobs`: array of job. They are executed in order.
   - `repoPath` : repository path to run commands.
-  - `targets` : string or array; matched when any of commited files starts with the given path; matched always when '*' is given.
+  - `targets` : string or array; matched when any of commited files starts with the given path; matched always when `*` is given.
   - `commands` : string or array; When any of targets are met, its commands are executed in order. When any command fails, it stops and notifies.
 
 config.json
