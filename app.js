@@ -52,8 +52,8 @@ if (!repoPath || !fs.existsSync(repoPath)) {
 }
 
 try {
-  repoBranch = execSync(`git -C ${repoPath} rev-parse --abbrev-ref HEAD`).toString();
-  var orgUrl = execSync(`git -C ${repoPath} config --get remote.origin.url`).toString();
+  repoBranch = execSync(`git -C ${repoPath} rev-parse --abbrev-ref HEAD`).toString().trim();
+  var orgUrl = execSync(`git -C ${repoPath} config --get remote.origin.url`).toString().trim();
   repoName = orgUrl.match(/([^/]+)\.git\s*$/)[1];
 } catch (e){
   console.error('failre to get repo branch or name', e.toString());
@@ -108,7 +108,10 @@ function runCmd(cmd, changed, cb) {
 
 function processQueue() {
   // ignore if underway
-  if (processQueue.underway) { return; }
+  if (processQueue.underway) { 
+    console.log('processQueue: underway');
+    return; 
+  }
   processQueue.underway = true;
 
   var data;

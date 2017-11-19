@@ -27,6 +27,7 @@ Your Repo -> Settings -> Webhooks
   Secret: **your_secret**
   [v] Just the push event.
   [v] Active
+  Press "Disable SSL verification" on self-signed certification.
 ```
 
 ## Register deploy  key
