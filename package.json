@@ -13,6 +13,8 @@
     "commander": "^2.11.0",
     "githubhook": "^1.7.1",
     "lodash": "^4.17.4",
-    "slack-notify": "^0.1.6"
+    "slack-notify": "^0.1.6",
+    "winston": "^2.4.0",
+    "winston-log-and-exit": "^1.0.6"
   }
 }
