@@ -211,5 +211,5 @@ process.on('SIGTERM', function () {
     winston.log_and_exit('error', 'SIGTERM', 1);
 });
 process.on('exit', function () {
-    logger.error('exit called');
+    winston.log_and_exit('error', 'exit called', 1);
 });
