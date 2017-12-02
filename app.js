@@ -149,7 +149,7 @@ function processQueue() {
             if (slack) {
               slack.send({
                 channel: '#' + slackChannel,
-                text: ['OK - from the last failure', 
+                text: ['OK - from the last failure or 1st run', 
                   'CHNAGED:', '```', JSON.stringify(changed, null, 2), '```'].join('\n'),
                   username: 'ci-' + os.hostname()
               });
