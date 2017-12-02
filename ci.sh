@@ -8,7 +8,12 @@
 CUR_DIR=$(dirname $0)
 cd $CUR_DIR;
 
+if [ -n "$CI_LOG_FILE" ]; then
+LOG_FILE="$CI_LOG_FILE"
+else
 LOG_FILE="ci.log"
+fi
+
 LOG_ROTATE_SRC_FILE="ci.logrotate"
 LOG_ROTATE_DST_FILE="/etc/etc/logrotate.d/ci"
 
@@ -33,4 +38,4 @@ RUNNIG_PID=`lsof -i :$CI_PORT | grep LISTEN | awk '{print $2}'`
 [ -n "$RUNNIG_PID" ] && kill -9 "$RUNNIG_PID"
 
 #run
-nohup node app.js -p $CI_PORT -c $CI_CONFIG > $LOG_FILE 2>&1 &
+nohup node app.js -p $CI_PORT -c $CI_CONFIG -s "$CI_SECRET" -l $LOG_FILE &

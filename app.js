@@ -5,14 +5,17 @@ var _ = require('lodash');
 var os = require('os');
 var fs = require('fs');
 var process = require('process');
+var logger = require('winston');
 var async = require('async');
 const spawn = require('child_process').spawn;
 const execSync = require('child_process').execSync;
 var program = require('commander');
+require('winston-log-and-exit');
 
 program
   .usage('[options]')
   .option('-c, --config <path>', 'set config path. defaults to ./config.json', './config.json')
+  .option('-l, --log <path>', 'set config path. defaults to ./ci.log', './ci.log')
   .option('-p, --port <n>', 'listening port', parseInt)
   .option('-s, --secret <secret>', 'webhook secret. use CI_SECRET env if not defined')
   .parse(process.argv);
@@ -22,10 +25,22 @@ program
     process.exit(1);
   }
 
+logger.configure({
+  exitOnError: false,
+  transports: [
+    new logger.transports.Console(),
+    new logger.transports.File({ 
+      handleExceptions: true,
+      json: false,
+      filename: program.log 
+    })
+  ]
+});
+
 var CFG;
-try { CFG = require(program.config); } catch (e) {console.error(e);}
+try { CFG = require(program.config); } catch (e) {logger.error(e);}
 if (!CFG) {
-  console.error('failure to load config: ' + program.config);
+  logger.error('failure to load config: ' + program.config);
   process.exit(1);
 }
 
@@ -47,7 +62,7 @@ if (_.get(CFG, 'notification.selection') === 'slack' &&
 
 repoPath = CFG.repoPath || process.cwd();
 if (!repoPath || !fs.existsSync(repoPath)) {
-  console.error('check repoPath in config: ' + program.config);
+  logger.error('check repoPath in config: ' + program.config);
   process.exit(1);
 }
 
@@ -56,7 +71,7 @@ try {
   var orgUrl = execSync(`git -C ${repoPath} config --get remote.origin.url`).toString().trim();
   repoName = orgUrl.match(/([^/]+)\.git\s*$/)[1];
 } catch (e){
-  console.error('failre to get repo branch or name', e.toString());
+  logger.error('failre to get repo branch or name', e.toString());
   process.exit(1);
 }
 
@@ -68,7 +83,7 @@ _.each(CFG.jobs, (j) => {
 });
 
 
-//console.log('CFG', JSON.stringify(CFG));
+//logger.info('CFG', JSON.stringify(CFG));
 function runCmd(cmd, changed, cb) {
   //FIXME: use spawn async
   
@@ -84,11 +99,11 @@ function runCmd(cmd, changed, cb) {
     stderr += data.toString();
   });
   rtn.on('exit', (exitCode) => {
-    console.log('runCmd: ' + cmd);
-    console.log('STDOUT', stdout);
+    logger.info('runCmd: ' + cmd);
+    logger.info('STDOUT', stdout);
     if (exitCode !== 0) {
-      console.log('Error status=' + exitCode);
-      console.log('STDERR', stderr);
+      logger.info('Error status=' + exitCode);
+      logger.info('STDERR', stderr);
       if (slack) {
         slack.send({
           channel: '#' + slackChannel,
@@ -109,7 +124,7 @@ function runCmd(cmd, changed, cb) {
 function processQueue() {
   // ignore if underway
   if (processQueue.underway) { 
-    console.log('processQueue: underway');
+    logger.info('processQueue: underway');
     return; 
   }
   processQueue.underway = true;
@@ -127,7 +142,7 @@ function processQueue() {
       });
       changed = _.sortBy(changed);
 
-      console.log('changed files=', changed);
+      logger.info('changed files=', changed);
 
       async.eachSeries(CFG.jobs, (j, seriesDone) => {
         let met = _.some(j.targets, (t) => {
@@ -143,7 +158,7 @@ function processQueue() {
       }, function(err){
         if (err) {
           failLast = true;
-          console.log('job done with error:', err.toString());
+          logger.info('job done with error:', err.toString());
         } else {
           if (failLast === true) {
             if (slack) {
@@ -156,14 +171,14 @@ function processQueue() {
             }
           }
           failLast = false;
-          console.log('job done!');
+          logger.info('job done!');
         }
         whilstDone();
       });
     },
     function (err) { // all queues are processed
       if (err) {
-        console.error('processQueue: whilst done error', err);
+        logger.error('processQueue: whilst done error', err);
       }
       processQueue.underway = false;
     }
@@ -183,8 +198,18 @@ github = githubhook({
 github.listen();
 
 //function process(event, data) {
-console.log(`Wating for ${githubHookEvent} ...`);
+logger.info(`Wating for ${githubHookEvent} ...`);
 github.on(githubHookEvent, function (data) {
   eventQueue.push(data); // enqueue
   processQueue();
+});
+
+process.on('uncaughtException', function (err) {
+    logger.error('[uncaughtException]', err);
+});
+process.on('SIGTERM', function () {
+    winston.log_and_exit('error', 'SIGTERM', 1);
+});
+process.on('exit', function () {
+    winston.log_and_exit('error', 'exit called', 1);
 });
