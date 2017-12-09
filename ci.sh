@@ -14,6 +14,10 @@ else
 LOG_FILE="ci.log"
 fi
 
+if [ -z "$CI_WEB_PORT" ]; then
+CI_WEB_PORT=443
+fi
+
 LOG_ROTATE_SRC_FILE="ci.logrotate"
 LOG_ROTATE_DST_FILE="/etc/etc/logrotate.d/ci"
 
@@ -38,4 +42,4 @@ RUNNIG_PID=`lsof -i :$CI_PORT | grep LISTEN | awk '{print $2}'`
 [ -n "$RUNNIG_PID" ] && kill -9 "$RUNNIG_PID"
 
 #run
-nohup node app.js -p $CI_PORT -c $CI_CONFIG -s "$CI_SECRET" -l $LOG_FILE &
+nohup node app.js -p $CI_PORT -c $CI_CONFIG -s "$CI_SECRET" -l $LOG_FILE -w $CI_WEB_PORT &

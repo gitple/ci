@@ -10,9 +10,13 @@
   "license": "MIT",
   "dependencies": {
     "async": "^2.1.5",
+    "basic-auth-connect": "^1.0.0",
     "commander": "^2.11.0",
+    "dateformat": "^3.0.2",
+    "express": "^4.16.2",
     "githubhook": "^1.9.3",
     "lodash": "^4.17.4",
+    "serve-index": "^1.9.1",
     "slack-notify": "^0.1.6",
     "winston": "^2.4.0",
     "winston-log-and-exit": "^1.0.6"

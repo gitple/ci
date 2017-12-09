@@ -4,19 +4,26 @@ var githubhook = require('githubhook');
 var _ = require('lodash');
 var os = require('os');
 var fs = require('fs');
+var path = require('path');
 var process = require('process');
-var logger = require('winston');
+var winston = require('winston');
+var dateFormat = require('dateformat');
 var async = require('async');
 const spawn = require('child_process').spawn;
 const execSync = require('child_process').execSync;
 var program = require('commander');
 require('winston-log-and-exit');
 
+const DEFAULT_MAX_FILES = 100;
+const DEFAULT_WEB_PORT = 443;
+
 program
   .usage('[options]')
-  .option('-c, --config <path>', 'set config path. defaults to ./config.json', './config.json')
-  .option('-l, --log <path>', 'set config path. defaults to ./ci.log', './ci.log')
-  .option('-p, --port <n>', 'listening port', parseInt)
+  .option('-c, --config <path>', 'set config path. default ./config.json', './config.json')
+  .option('-l, --log <path>', 'set config path. default ./ci.log', './ci.log')
+  .option('-p, --port <n>', 'listening port(required)', parseInt)
+  .option('-w, --webport <n>', `web listing port. default ${DEFAULT_WEB_PORT}`, parseInt)
+  .option('-n, --files <n>', `the max number of log files to keep. default ${DEFAULT_MAX_FILES}`, parseInt)
   .option('-s, --secret <secret>', 'webhook secret. use CI_SECRET env if not defined')
   .parse(process.argv);
   if (!process.argv.slice(2).length || !program.port ||
@@ -25,11 +32,18 @@ program
     process.exit(1);
   }
 
-logger.configure({
+  if (!program.files) {
+    program.files = DEFAULT_MAX_FILES;
+  }
+  if (!program.webport) {
+    program.webport = DEFAULT_WEB_PORT;
+  }
+
+winston.configure({
   exitOnError: false,
   transports: [
-    new logger.transports.Console(),
-    new logger.transports.File({ 
+    new winston.transports.Console(),
+    new winston.transports.File({ 
       handleExceptions: true,
       json: false,
       filename: program.log 
@@ -38,9 +52,9 @@ logger.configure({
 });
 
 var CFG;
-try { CFG = require(program.config); } catch (e) {logger.error(e);}
+try { CFG = require(program.config); } catch (e) {winston.error(e);}
 if (!CFG) {
-  logger.error('failure to load config: ' + program.config);
+  winston.error('failure to load config: ' + program.config);
   process.exit(1);
 }
 
@@ -52,6 +66,7 @@ var github,
   repoBranch,
   githubHookEvent,
   eventQueue = [],
+  PUBLIC_DIR = `${__dirname}/public`,
   failLast = true;
 
 if (_.get(CFG, 'notification.selection') === 'slack' && 
@@ -62,7 +77,7 @@ if (_.get(CFG, 'notification.selection') === 'slack' &&
 
 repoPath = CFG.repoPath || process.cwd();
 if (!repoPath || !fs.existsSync(repoPath)) {
-  logger.error('check repoPath in config: ' + program.config);
+  winston.error('check repoPath in config: ' + program.config);
   process.exit(1);
 }
 
@@ -71,7 +86,7 @@ try {
   var orgUrl = execSync(`git -C ${repoPath} config --get remote.origin.url`).toString().trim();
   repoName = orgUrl.match(/([^/]+)\.git\s*$/)[1];
 } catch (e){
-  logger.error('failre to get repo branch or name', e.toString());
+  winston.error('failre to get repo branch or name', e.toString());
   process.exit(1);
 }
 
@@ -82,9 +97,12 @@ _.each(CFG.jobs, (j) => {
   if (!_.isArray(j.commands)) { j.commands = [j.commands]; }
 });
 
+if (!fs.existsSync(PUBLIC_DIR)){
+    fs.mkdirSync(PUBLIC_DIR);
+}
 
-//logger.info('CFG', JSON.stringify(CFG));
-function runCmd(cmd, changed, cb) {
+//winston.info('CFG', JSON.stringify(CFG));
+function runCmd(cmd, changed, runLogger, cb) {
   //FIXME: use spawn async
   
   process.chdir(repoPath);
@@ -99,11 +117,11 @@ function runCmd(cmd, changed, cb) {
     stderr += data.toString();
   });
   rtn.on('exit', (exitCode) => {
-    logger.info('runCmd: ' + cmd);
-    logger.info('STDOUT', stdout);
+    runLogger.info('runCmd: ' + cmd);
+    runLogger.info('STDOUT', stdout);
     if (exitCode !== 0) {
-      logger.info('Error status=' + exitCode);
-      logger.info('STDERR', stderr);
+      runLogger.info('Error status=' + exitCode);
+      runLogger.info('STDERR', stderr);
       if (slack) {
         slack.send({
           channel: '#' + slackChannel,
@@ -124,7 +142,7 @@ function runCmd(cmd, changed, cb) {
 function processQueue() {
   // ignore if underway
   if (processQueue.underway) { 
-    logger.info('processQueue: underway');
+    winston.info('processQueue: underway');
     return; 
   }
   processQueue.underway = true;
@@ -136,13 +154,20 @@ function processQueue() {
       return (!!data);
     },
     function (whilstDone) {
+      var runLogger = new winston.Logger();
+      var filename = dateFormat(new Date(), 'isoDateTime');
+      runLogger.add(winston.transports.File, { 
+        filename: `${PUBLIC_DIR}/${filename}.log` ,
+        json: false
+      });
+
       var changed = [];
       _.each(data.commits, function(commit) {
         changed = _.union(changed, commit.added, commit.removed, commit.modified);
       });
       changed = _.sortBy(changed);
 
-      logger.info('changed files=', changed);
+      runLogger.info('changed files=', changed);
 
       async.eachSeries(CFG.jobs, (j, seriesDone) => {
         let met = _.some(j.targets, (t) => {
@@ -151,14 +176,14 @@ function processQueue() {
         });
         if (!met) { return seriesDone(); }
         async.eachSeries(j.commands, (cmd, cmdDone) => {
-          runCmd(cmd, changed, cmdDone);
+          runCmd(cmd, changed, runLogger, cmdDone);
         }, function(err) {
           return seriesDone(err);
         });
       }, function(err){
         if (err) {
           failLast = true;
-          logger.info('job done with error:', err.toString());
+          runLogger.info('job done with error:', err.toString());
         } else {
           if (failLast === true) {
             if (slack) {
@@ -171,45 +196,76 @@ function processQueue() {
             }
           }
           failLast = false;
-          logger.info('job done!');
+          runLogger.info('job done!');
         }
+        runLogger.close();
         whilstDone();
       });
     },
     function (err) { // all queues are processed
       if (err) {
-        logger.error('processQueue: whilst done error', err);
+        winston.error('processQueue: whilst done error', err);
       }
       processQueue.underway = false;
+
+      // keep only n files
+      var files = fs.readdirSync(PUBLIC_DIR);
+      if (_.size(files) <= program.files) { return; }
+      files = _.sortBy(files, (f) => {
+        return fs.statSync(path.join(PUBLIC_DIR, f)).ctime;
+      });
+      files = files.slice(0, _.size(files) - program.files);
+      _.each(files, (f) => {
+        fs.unlinkSync(path.join(PUBLIC_DIR, f));
+      });
     }
   );
 }
+
+const httpsOptions = {
+  key: fs.readFileSync('./key.pem'),
+  cert: fs.readFileSync('./cert.pem')
+};
 
 github = githubhook({
   port: program.port,
   secret: program.secret || process.env.CI_SECRET,
   path: '/',
-  https: {
-    key: fs.readFileSync('./key.pem'),
-    cert: fs.readFileSync('./cert.pem')
-  }
+  https: httpsOptions,
 });
 
 github.listen();
 
 //function process(event, data) {
-logger.info(`Wating for ${githubHookEvent} ...`);
+winston.info(`Wating for ${githubHookEvent} ...`);
 github.on(githubHookEvent, function (data) {
   eventQueue.push(data); // enqueue
   processQueue();
 });
 
 process.on('uncaughtException', function (err) {
-    logger.error('[uncaughtException]', err);
+    winston.error('[uncaughtException]', err);
 });
 process.on('SIGTERM', function () {
-    winston.log_and_exit('error', 'SIGTERM', 1);
+  winston.log_and_exit('error', 'SIGTERM', 1);
 });
 process.on('exit', function () {
     winston.log_and_exit('error', 'exit called', 1);
+});
+
+
+
+var https = require('https');
+var express = require('express');
+var serveIndex = require('serve-index');
+var basicAuth = require('basic-auth-connect');
+
+var app = express();
+
+app.use(basicAuth('admin', program.secret || process.env.CI_SECRET));
+app.use(express.static(PUBLIC_DIR + '/'));
+app.use('/', serveIndex(PUBLIC_DIR + '/', {icons: true, view: 'details'}));
+
+const server = https.createServer(httpsOptions, app).listen(program.webport, () => {
+  winston.log('log listing port: ' + program.webport);
 });

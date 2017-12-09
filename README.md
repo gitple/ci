@@ -9,9 +9,15 @@ How to use
   - `CI_SECRET`: the secret set at your webhook configuration in Github.
   - `CI_CONFIG`: ci configration file(either js or json). e.g. `config.json`
   - `CI_LOG_FILE`: ci logfile file path. default: './ci.log'
+  - `CI_WEB_PORT`: web port for listing command logs. default: '443'
 - At the 1st run of ci.sh, npm modules are installed.
 - The log file, `ci.log` is created; Place `ci.logrotate` file into /etc/logrotate.d/ after fixing the log path in it.
 - Place your private key(`key.pem`) and certificate(`cert.pem`), otherwise they are generated as a self-signed one.
+- Listing command logs:
+  - access to `https://localhost/`
+  - basic auth
+    - id: `admin`
+    - password: the secret in environment var: `CI_SECRET`
 
 ``` 
 CI_PORT=51234 CI_SECRET={webhook secret} \
