@@ -3,28 +3,54 @@ This is very simple CI(continuous integration) tool based on [node-github-hook](
 
 How to use
 ---------------------
-- Just run ci.sh as below. You can do it at /etc/rc.local to run at boot.
-- Environment variables
-  - `CI_PORT`: listening port number.
-  - `CI_SECRET`: the secret set at your webhook configuration in Github.
-  - `CI_CONFIG`: ci configration file(either js or json). e.g. `config.json`
-  - `CI_LOG_FILE`: ci logfile file path. default: './ci.log'
-  - `CI_WEB_PORT`: web port for listing command logs. default: '443'
-- At the 1st run of ci.sh, npm modules are installed.
-- The log file, `ci.log` is created; Place `ci.logrotate` file into /etc/logrotate.d/ after fixing the log path in it.
-- Place your private key(`key.pem`) and certificate(`cert.pem`), otherwise they are generated as a self-signed one.
-- Listing command logs:
-  - access to `https://localhost/`
-  - basic auth
-    - id: `admin`
-    - password: the secret in environment var: `CI_SECRET`
+## Before 1st time run, do the followings once.
 
-``` 
-CI_PORT=51234 CI_SECRET={webhook secret} \
-CI_CONFIG={ci config path} \
-CI_LOG_FILE=/var/log/ci.log \
-{path to ci repo dir}/ci.sh
-``` 
+### install modules
+
+```
+$ npm install
+```
+
+### generate self-signed cert
+
+Place your private key(`key.pem`) and certificate(`cert.pem`), otherwise a self-signed cert is generated.
+
+```
+$ npm cert
+```
+
+### run 
+
+
+- how to use
+
+```
+./app.js -h
+
+  Usage: app [options]
+
+  Options:
+    -c, --config <path>    set config path. default ./config.json
+    -p, --port <n>         listening port(required)
+    -w, --webport <n>      web listing port. default 443
+    -n, --files <n>        the max number of log files to keep. default 100
+    -s, --secret <secret>  webhook secret. use CI_SECRET env if not defined
+    -h, --help             output usage information
+```
+
+- example
+  - scret
+    The secret is the one set at your webhook configuration in Github. You can set it as command line option(`-s`) or `CI_SECRET` environment variable.
+  - listing command logs
+    You can set the port for listing command logs using the option(`-w`). The authentication id and password are as follows.
+    - acesss url: `https://localhost:{webport}/`
+    - basic auth
+      - id: `admin`
+      - password: {the secret}
+
+```
+$ CI_SECRET="secret" ./app.js -p 51234 -w 8443 -c ./config.json &
+```
 
 github webbhook setup
 -------------------

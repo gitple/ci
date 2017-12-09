@@ -6,9 +6,8 @@ CI_WEB_PORT=8443
 
 RUNNIG_PID=`lsof -i :$CI_PORT | grep LISTEN | awk '{print $2}'`
 [ -n "$RUNNIG_PID" ] && kill -9 "$RUNNIG_PID"
-CI_PORT=$CI_PORT CI_SECRET=nosecret CI_WEB_PORT=$CI_WEB_PORT \
-  CI_CONFIG=./test/fixtures/config.js \
-./ci.sh > ./ci.log 2>&1 &
+CI_SECRET=nosecret ./app.js -p $CI_PORT -w $CI_WEB_PORT \
+  -c ./test/fixtures/config.js > ./ci.log 2>&1 &
 
 sleep 1
 

@@ -4,6 +4,11 @@
   "description": "",
   "main": "app.js",
   "scripts": {
+    "bin": {
+      "ci": "./app.js"
+    },
+    "start": "./app.js",
+    "cert": "if [ ! -f key.pem ]; then openssl genrsa -out key.pem 2048; openssl req -new -key key.pem -config ci.cnf -out ci.csr; openssl x509 -req -days 365 -in ci.csr -signkey key.pem -out cert.pem; rm -f ci.csr; fi",
     "test": "cd test && for test in ./[1-9]_*.sh; do $test; done;"
   },
   "author": "",

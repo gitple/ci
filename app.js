@@ -20,7 +20,6 @@ const DEFAULT_WEB_PORT = 443;
 program
   .usage('[options]')
   .option('-c, --config <path>', 'set config path. default ./config.json', './config.json')
-  .option('-l, --log <path>', 'set config path. default ./ci.log', './ci.log')
   .option('-p, --port <n>', 'listening port(required)', parseInt)
   .option('-w, --webport <n>', `web listing port. default ${DEFAULT_WEB_PORT}`, parseInt)
   .option('-n, --files <n>', `the max number of log files to keep. default ${DEFAULT_MAX_FILES}`, parseInt)
@@ -42,12 +41,7 @@ program
 winston.configure({
   exitOnError: false,
   transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ 
-      handleExceptions: true,
-      json: false,
-      filename: program.log 
-    })
+    new winston.transports.Console()
   ]
 });
 
