@@ -49,6 +49,8 @@ $ npm cert
       - password: {the secret}
 
 ```
+# kill running ci process.
+$ CI_PID=`lsof -i :$CI_PORT | grep LISTEN | awk '{print $2}'`; [ -n "$CI_PID" ] && kill -9 "$CI_PID"
 $ CI_SECRET="secret" ./app.js -p 51234 -w 8443 -c ./config.json &
 ```
 
