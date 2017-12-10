@@ -1,17 +1,17 @@
 
 This is very simple CI(continuous integration) tool based on [node-github-hook](https://github.com/nlf/node-github-hook). It works with Github webhook.
 
-How to use
----------------------
-## Before 1st time run, do the followings once.
+# How to use
 
-### install modules
+## At 1st use, do the followings once.
+
+### Install modules
 
 ```
 $ npm install
 ```
 
-### generate self-signed cert
+### Generate self-signed cert
 
 Place your private key(`key.pem`) and certificate(`cert.pem`), otherwise a self-signed cert is generated.
 
@@ -19,10 +19,7 @@ Place your private key(`key.pem`) and certificate(`cert.pem`), otherwise a self-
 $ npm cert
 ```
 
-### run 
-
-
-- how to use
+## How to run
 
 ```
 ./app.js -h
@@ -38,7 +35,7 @@ $ npm cert
     -h, --help             output usage information
 ```
 
-- example
+- Example use
   - scret
     The secret is the one set at your webhook configuration in Github. You can set it as command line option(`-s`) or `CI_SECRET` environment variable.
   - listing command logs
@@ -54,8 +51,8 @@ $ CI_PID=`lsof -i :$CI_PORT | grep LISTEN | awk '{print $2}'`; [ -n "$CI_PID" ] 
 $ CI_SECRET="secret" ./app.js -p 51234 -w 8443 -c ./config.json &
 ```
 
-github webbhook setup
--------------------
+# Github webbhook setup
+
 ## Github Webhooks settings: 
 
 Your Repo -> Settings -> Webhooks
@@ -69,28 +66,30 @@ Your Repo -> Settings -> Webhooks
   Press "Disable SSL verification" on self-signed certification.
 ```
 
-## Register deploy  key
+## Register deploy key
 
 Your Repo -> Settings -> Deploy keys
 
 - generate your deploy key and register it.
+
   ```
   ssh-keygen
   ```
 
-## Security group 
+## Allow security group 
 
 allow the ci listening port from github
   - 192.30.252.0/22 see: https://help.github.com/articles/what-ip-addresses-does-github-use-that-i-should-whitelist/
 
-Config file
-------------------
+
+# CI Config file
 
 `config.json` file should be modified per your environemt.
 
 ## notificaiton
   - For now, only slack is supported.
   - webhookrul and channel should be provided.
+
 ## jobs
   - `jobs`: array of job. They are executed in order.
   - `repoPath` : repository path to run commands.
@@ -98,7 +97,7 @@ Config file
   - `commands` : string or array; When any of targets are met, its commands are executed in order. When any command fails, it stops and notifies.
 
 config.json
-```
+```json
 {
   "notification": {
     "selection": "slack",
@@ -123,8 +122,7 @@ config.json
 }
 ```
 
-test
------------
+# test
 
 ```
 npm test
