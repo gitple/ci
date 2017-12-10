@@ -5,9 +5,16 @@ This is very simple CI(continuous integration) tool based on [node-github-hook](
 
 ## At 1st use, do the followings once.
 
+### clone repo
+
+```
+$ git clone https://github.com/gitple/ci.git
+```
+
 ### Install modules
 
 ```
+$ cd ci
 $ npm install
 ```
 
@@ -36,7 +43,7 @@ $ npm cert
 ```
 
 - Example use
-  - scret
+  - secret
     The secret is the one set at your webhook configuration in Github. You can set it as command line option(`-s`) or `CI_SECRET` environment variable.
   - listing command logs
     You can set the port for listing command logs using the option(`-w`). The authentication id and password are as follows.
@@ -51,7 +58,7 @@ $ CI_PID=`lsof -i :$CI_PORT | grep LISTEN | awk '{print $2}'`; [ -n "$CI_PID" ] 
 $ CI_SECRET="secret" ./app.js -p 51234 -w 8443 -c ./config.json &
 ```
 
-# Github webbhook setup
+# Setup at Github
 
 ## Github Webhooks settings: 
 
