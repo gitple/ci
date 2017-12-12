@@ -1,6 +1,8 @@
 
 This is very simple CI(continuous integration) tool based on [node-github-hook](https://github.com/nlf/node-github-hook). It works with Github webhook.
 
+For Korean, please see this blog post: [CI - 지속적 통합 도구](http://tech.gitple.io/2017/12/13/ci-oss/)
+
 # How to use
 
 ## At 1st use, do the followings once.
