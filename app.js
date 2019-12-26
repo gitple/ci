@@ -24,6 +24,7 @@ program
   .option('-w, --webport <n>', `web listing port. default ${DEFAULT_WEB_PORT}`, parseInt)
   .option('-n, --files <n>', `the max number of log files to keep. default ${DEFAULT_MAX_FILES}`, parseInt)
   .option('-s, --secret <secret>', 'webhook secret. use CI_SECRET env if not defined')
+  .option('-a, --webauth <webauth>', 'web admin password. use CI_SECRET env if not defined')
   .parse(process.argv);
   if (!process.argv.slice(2).length || !program.port ||
     (!program.secret && !process.env.CI_SECRET)) {
@@ -256,7 +257,7 @@ var basicAuth = require('basic-auth-connect');
 
 var app = express();
 
-app.use(basicAuth('admin', program.secret || process.env.CI_SECRET));
+app.use(basicAuth('admin', program.webauth || process.env.CI_SECRET));
 app.use(express.static(PUBLIC_DIR + '/'));
 app.use('/', serveIndex(PUBLIC_DIR + '/', {icons: true, view: 'details'}));
 
