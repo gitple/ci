@@ -1,0 +1,43 @@
+const execSync = require('child_process').execSync;
+var repoPath = execSync('git rev-parse --show-toplevel').toString().trim();
+
+module.exports = {
+  "notification": {
+    "selection": "slack",
+    "slack": {
+      "webhookurl": "http://localhost:51235",
+      "channel": "your_channel_to_be_notified"
+    }
+  },
+  "repoPath": repoPath,
+  "jobs": [
+    {
+      "targets": "*",
+      "commands": "git pull"
+    },
+    {
+      "repoName": "not_existing_repo"
+      "targets": "*",
+      "commands": [ "npm install", "(echo repo_shoud_not_be_matched && touch repo_shoud_not_be_matched  && exit 0)" ] 
+    },
+    {
+      "targets": "*",
+      "commands": [ 
+        "[ ! -f repo_shoud_not_be_matched ] && (echo "success: repo_shoud_not_be_matched" && exit 0) ],
+        "[ -f repo_shoud_not_be_matched ] && (echo "failure: repo_shoud_not_be_matched" && rm -f repo_shoud_not_be_matched && exit -1) ],
+      ]
+    },
+    {
+      "reponame": "ci"
+      "targets": "*",
+      "commands": [ "npm install", "(echo repo_shoud_be_matched && touch repo_shoud_be_matched  && exit 0)" ] 
+    },
+    {
+      "targets": "*",
+      "commands": [ 
+        "[ -f repo_shoud_be_matched ] && (echo "success: repo_shoud_be_matched" && rm -f repo_shoud_be_matched && exit 0) ],
+        "[ ! -f repo_shoud_be_matched ] && (echo "failure: repo_shoud_be_matched" && exit -1) ],
+      ]
+    },
+  ]
+}

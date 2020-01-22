@@ -56,10 +56,10 @@ if (!CFG) {
 var github,
   slack,
   slackChannel,
-  repoPath,
+  repoPaths,
+  repoInfos = [],
   repoName,
   repoBranch,
-  githubHookEvent,
   eventQueue = [],
   PUBLIC_DIR = `${__dirname}/public`,
   failLast = true;
@@ -70,22 +70,35 @@ if (_.get(CFG, 'notification.selection') === 'slack' &&
   slackChannel = CFG.notification.slack.channel || 'ci';
 }
 
-repoPath = CFG.repoPath || process.cwd();
-if (!repoPath || !fs.existsSync(repoPath)) {
-  winston.error('check repoPath in config: ' + program.config);
-  process.exit(1);
-}
+repoPaths = CFG.repoPath || process.cwd();
+if (!_.isArray(repoPaths)) { repoPaths = [repoPaths]; }
 
-try {
-  repoBranch = execSync(`git -C ${repoPath} rev-parse --abbrev-ref HEAD`).toString().trim();
-  var orgUrl = execSync(`git -C ${repoPath} config --get remote.origin.url`).toString().trim();
-  repoName = orgUrl.match(/([^/]+)\.git\s*$/)[1];
-} catch (e){
-  winston.error('failre to get repo branch or name', e.toString());
-  process.exit(1);
-}
+_.each(repoPaths, (repoPath) => {
+  if (!repoPath || !fs.existsSync(repoPath)) {
+    winston.error('check repoPath in config: ' + program.config);
+    process.exit(1);
+  }
 
-githubHookEvent = `push:${repoName}:refs/heads/${repoBranch}`;
+
+  try {
+    repoBranch = execSync(`git -C ${repoPath} rev-parse --abbrev-ref HEAD`).toString().trim();
+    var orgUrl = execSync(`git -C ${repoPath} config -l |grep "^remote\..*\.url=" | cut -d'=' -f2`).toString().trim();
+    repoName = orgUrl.match(/([^/]+)(\.git\s*$|$)/)[1];
+  } catch (e){
+    winston.error('failre to get repo branch or name', e.toString());
+    process.exit(1);
+  }
+
+  repoInfos.push({
+	  path: repoPath,
+	  branch: repoBranch,
+	  name: repoName,
+	  hookevent: `push:${repoName}:refs/heads/${repoBranch}`,
+  });
+});
+
+winston.info('=== Repo Infos ===');
+winston.info(JSON.stringify(repoInfos));
 
 _.each(CFG.jobs, (j) => {
   if (!_.isArray(j.targets)) { j.targets = [j.targets]; }
@@ -97,10 +110,10 @@ if (!fs.existsSync(PUBLIC_DIR)){
 }
 
 //winston.info('CFG', JSON.stringify(CFG));
-function runCmd(cmd, changed, runLogger, cb) {
+function runCmd(cmd, repoInfo, changed, runLogger, cb) {
   //FIXME: use spawn async
   
-  process.chdir(repoPath);
+  process.chdir(repoInfo.repoPath);
   const rtn = spawn('/bin/bash', ['-c', cmd]);
 
   let stdout = '';
@@ -165,13 +178,17 @@ function processQueue() {
       runLogger.info('changed files=', changed);
 
       async.eachSeries(CFG.jobs, (j, seriesDone) => {
+        //check repo name first
+        var repoInfo = _.find(repoInfos, {name: _.get(data, 'repository.name')});
+        if (j.repoName && ('*' != j.repoName && repoInfo.name != j.repoName )) { return seriesDone(); }
+        //continue repoName is missing or matched
         let met = _.some(j.targets, (t) => {
           if (t === '*') { return true; }
           return _.some(changed, (v) => _.startsWith(v, t));
         });
         if (!met) { return seriesDone(); }
         async.eachSeries(j.commands, (cmd, cmdDone) => {
-          runCmd(cmd, changed, runLogger, cmdDone);
+          runCmd(cmd, repoInfo, changed, runLogger, cmdDone);
         }, function(err) {
           return seriesDone(err);
         });
@@ -232,12 +249,18 @@ github = githubhook({
 github.listen();
 
 //function process(event, data) {
-winston.info(`Wating for ${githubHookEvent} ...`);
-github.on(githubHookEvent, function (data) {
-  eventQueue.push(data); // enqueue
-  processQueue();
+_.each(repoInfos, (repoInfo) => {
+  winston.info(`Wating for ${repoInfo.hookevent} ...`);
+  github.on(repoInfo.hookevent, function (data) {
+    eventQueue.push(data); // enqueue
+  });
 });
 
+setInterval( () => {
+  if (_.size(eventQueue) > 0) { 
+    processQueue();
+  }
+}, 10*1000);
 process.on('uncaughtException', function (err) {
     winston.error('[uncaughtException]', err);
 });
@@ -264,3 +287,4 @@ app.use('/', serveIndex(PUBLIC_DIR + '/', {icons: true, view: 'details'}));
 const server = https.createServer(httpsOptions, app).listen(program.webport, () => {
   winston.log('log listing port: ' + program.webport);
 });
+
