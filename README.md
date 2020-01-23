@@ -99,9 +99,11 @@ allow the ci listening port from github
   - For now, only slack is supported.
   - webhookrul and channel should be provided.
 
+## repoPath
+  - `repoPath` : string or array of string; git repository path to run commands.
 ## jobs
   - `jobs`: array of job. They are executed in order.
-  - `repoPath` : repository path to run commands.
+  - `repoName`: repo name if multiple repoPath is given. matched always `*` is given.
   - `targets` : string or array; matched when any of commited files starts with the given path; matched always when `*` is given.
   - `commands` : string or array; When any of targets are met, its commands are executed in order. When any command fails, it stops and notifies.
 
@@ -118,6 +120,7 @@ config.json
   "repoPath": "_your_git_repo_path_to_build_and_test_",
   "jobs": [
     {
+      "repoName": "*",
       "targets": "*",
       "commands": "git pull"
     },

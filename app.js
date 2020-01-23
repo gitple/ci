@@ -81,7 +81,7 @@ _.each(repoPaths, (repoPath) => {
 
 
   try {
-    repoBranch = execSync(`git -C ${repoPath} rev-parse --abbrev-ref HEAD`).toString().trim();
+    repoBranch = execSync(`[ \`which repo\` ] && (cd ${repoPath} && repo info | grep "Manifest branch:" | cut -d':' -f2 | sed -r "s/[[:cntrl:]]\[[0-9]{1,3}m//g") || git -C ${repoPath} rev-parse --abbrev-ref HEAD`).toString().trim();
     var orgUrl = execSync(`git -C ${repoPath} config -l |grep "^remote\..*\.url=" | cut -d'=' -f2`).toString().trim();
     repoName = orgUrl.match(/([^/]+)(\.git\s*$|$)/)[1];
   } catch (e){
@@ -113,7 +113,7 @@ if (!fs.existsSync(PUBLIC_DIR)){
 function runCmd(cmd, repoInfo, changed, runLogger, cb) {
   //FIXME: use spawn async
   
-  process.chdir(repoInfo.repoPath);
+  process.chdir(repoInfo.path);
   const rtn = spawn('/bin/bash', ['-c', cmd]);
 
   let stdout = '';
@@ -150,9 +150,10 @@ function runCmd(cmd, repoInfo, changed, runLogger, cb) {
 function processQueue() {
   // ignore if underway
   if (processQueue.underway) { 
-    winston.info('processQueue: underway');
+    //winston.info('processQueue: underway');
     return; 
   }
+  winston.info(">> processQueue");
   processQueue.underway = true;
 
   var data;
@@ -175,11 +176,17 @@ function processQueue() {
       });
       changed = _.sortBy(changed);
 
+      var repoInfo = _.find(repoInfos, {name: _.get(data, 'repository.name')});
+      winston.info('repository.name', repoInfo.name);
+      winston.info('repository.path', repoInfo.path);
+      winston.info('head_commit', _.get(data, 'head_commit.id'));
+      winston.info('changed files=', changed);
+      runLogger.info('repository.name', repoInfo.name);
+      runLogger.info('repository.path', repoInfo.path);
+      runLogger.info('head_commit', _.get(data, 'head_commit.id'));
       runLogger.info('changed files=', changed);
-
       async.eachSeries(CFG.jobs, (j, seriesDone) => {
         //check repo name first
-        var repoInfo = _.find(repoInfos, {name: _.get(data, 'repository.name')});
         if (j.repoName && ('*' != j.repoName && repoInfo.name != j.repoName )) { return seriesDone(); }
         //continue repoName is missing or matched
         let met = _.some(j.targets, (t) => {
@@ -212,12 +219,13 @@ function processQueue() {
         }
         runLogger.close();
         whilstDone();
-      });
+      }); 
     },
     function (err) { // all queues are processed
       if (err) {
         winston.error('processQueue: whilst done error', err);
       }
+      winston.info("<< processQueue");
       processQueue.underway = false;
 
       // keep only n files
@@ -252,14 +260,18 @@ github.listen();
 _.each(repoInfos, (repoInfo) => {
   winston.info(`Wating for ${repoInfo.hookevent} ...`);
   github.on(repoInfo.hookevent, function (data) {
+    winston.info("got event", data.ref);
     eventQueue.push(data); // enqueue
+    processQueue();
   });
 });
 
 setInterval( () => {
+  //winston.info("> check");
   if (_.size(eventQueue) > 0) { 
     processQueue();
   }
+  //winston.info("< check");
 }, 10*1000);
 process.on('uncaughtException', function (err) {
     winston.error('[uncaughtException]', err);
