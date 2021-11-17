@@ -83,7 +83,7 @@ _.each(repoPaths, (repoPath) => {
   try {
     repoBranch = execSync(`[ \`which repo\` ] && (cd ${repoPath} && repo info | grep "Manifest branch:" | cut -d':' -f2 | sed -r "s/[[:cntrl:]]\[[0-9]{1,3}m//g") || git -C ${repoPath} rev-parse --abbrev-ref HEAD`).toString().trim();
     var orgUrl = execSync(`git -C ${repoPath} config -l |grep "^remote\..*\.url=" | cut -d'=' -f2`).toString().trim();
-    repoName = orgUrl.match(/([^/]+)(\.git\s*$|$)/)[1];
+    repoName = orgUrl.match(/([^/]+?)(\.git\s*$|$)/)[1];
   } catch (e){
     winston.error('failre to get repo branch or name', e.toString());
     process.exit(1);
