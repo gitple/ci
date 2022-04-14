@@ -14,7 +14,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "async": "^2.1.5",
+    "async": "^3.2.2",
     "basic-auth-connect": "^1.0.0",
     "commander": "^2.11.0",
     "dateformat": "^3.0.2",
